@@ -55,7 +55,9 @@ router.post('/login', function(req, res, next) {
       firstName: req.user.firstName,
       lastName: req.user.lastName,
       profilePicture: req.user.profilePicture,
+      batches: req.user.batches
     }
+    // console.log("batches :", newUser.batches)
     res.status(200).json(newUser)
     return
   }

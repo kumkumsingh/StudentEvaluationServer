@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Batch = require('../models/batch')
+const User = require('../models/user')
 
 //Create batch
 router.post("/", function (req, res, next) {
@@ -11,7 +12,17 @@ router.post("/", function (req, res, next) {
     endDate,
     })
     .then((batch) => {
-      res.status(200).json({ message: "Successfully created batch", batch:batch });
+      User.findByIdAndUpdate(
+        {_id: req.user._id},
+        {$push: { batches: batch._id}},
+        {new : true}
+      )
+      .then( (user) => {
+          res.status(200).json({ message: "Successfully created batch", batch, user });
+      })
+      .catch((e) => {
+         res.status(400).json({ message: "something  went wrong", error: e });
+      })
     })
     .catch((e) => {
       res.status(400).json({ message: "something  went wrong", error: e });

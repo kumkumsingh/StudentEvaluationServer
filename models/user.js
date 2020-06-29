@@ -14,8 +14,14 @@ const userSchema = new Schema(
        firstName: String,
        lastName: String,
        email: String,
-       profilePicture: String
-    }, {
+       profilePicture: String,
+       batches: {
+            type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Batch'}]
+            }
+    },
+     {
        timestamps: true 
     }
 )

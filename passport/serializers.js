@@ -10,10 +10,16 @@ passport.serializeUser((loggedInUser, cb) => {
 //User information fetched from User collection is stored in req.user
 passport.deserializeUser((userIdFromSession, cb) => {
   User.findById(userIdFromSession)
-  .then(userDocument => {
-    cb(null, userDocument);
-  })
-  .catch(err => {
-    cb(err);
-  })
+    .populate({
+      path: "batches",
+      model: "Batch",
+    })
+    .exec((err, userDocument) => {
+      if(err) {
+        console.log("err", err)
+        cb(err);
+      } else {
+        cb(null, userDocument)
+      }
+    });
 });
