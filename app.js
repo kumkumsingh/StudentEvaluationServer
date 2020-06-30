@@ -61,15 +61,14 @@ app.use('/users', usersRouter);
 const uploadRouter = require('./routes/upload');
 app.use('/upload', uploadRouter);
 
+const evaluationRouter = require('./routes/evaluation');
+app.use('/evaluation', evaluationRouter);
+
+const studentRouter = require('./routes/students');
+app.use('/students', studentRouter);
+
 const batchRouter = require('./routes/batch');
 app.use('/batch', batchRouter);
-
-const evaluationRouter = require('./routes/evaluation');
-app.use('/student/:id/evaluation', evaluationRouter);
-
-const studentRouter = require('./routes/student');
-app.use('/student', studentRouter);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

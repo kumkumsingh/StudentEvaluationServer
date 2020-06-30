@@ -17,12 +17,18 @@ router.post("/", function (req, res, next) {
         {$push: { batches: batch._id}},
         {new : true}
       )
-      .then( (user) => {
+      .populate({
+        path: "batches",
+        model: "Batch",
+      })
+      .exec((err, user) => {
+        if(err) {
+          console.log("err", )
+          res.status(400).json({ message: "something  went wrong", error:  err});
+        } else {
           res.status(200).json({ message: "Successfully created batch", batch, user });
-      })
-      .catch((e) => {
-         res.status(400).json({ message: "something  went wrong", error: e });
-      })
+        }
+      })      
     })
     .catch((e) => {
       res.status(400).json({ message: "something  went wrong", error: e });
@@ -41,16 +47,21 @@ router.delete("/:id", function (req, res) {
   })
 
 });
-//Get Batch details
-router.get("/", function(req, res , next){
-  Batch.find()
-  .then((batches) =>{
-    res.status(200).json({batches})
+//Get Batch details/ student overview
+router.get("/:batchId", function(req, res , next){
+  const { batchId } = req.params
+  Batch.findById({_id: batchId})
+  .populate({
+    path: "students",
+    model: "Student",   
   })
-  .catch((e) =>{
-    res.status(400).json({ message: "something  went wrong", error: e });
-  })
+  .exec((err, batch) => {
+    if(err) {
+      res.status(400).json({ message: "something  went wrong", error: err });
+    } else {
+      res.status(200).json({batch})
+    }
+  })  
 })
-
 
 module.exports = router;

@@ -6,18 +6,19 @@ const studentSchema = new Schema(
     name: String,
     imgUrl: String,
     lstClrCode: String,
-    evaluationId: {
-      type: Schema.Types.ObjectId,
-      ref:"Evaluation"
+    evaluations: {
+      type: [{
+       type: Schema.Types.ObjectId,
+       ref: 'Evaluation'
+    }],
     },
-    batch: {
+    batchId: {
           type: Schema.Types.ObjectId,
           ref: "Batch",
-    },
-  
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

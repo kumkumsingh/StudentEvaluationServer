@@ -3,16 +3,6 @@ const router = express.Router();
 const Evaluation = require("../models/evaluation");
 const Student = require("../models/student")
 
-//Get all evaluations
-router.get("/", function(req, res , next){
-    Evaluation.find()
-    .then((evaluations) =>{
-      res.status(200).json({evaluations})
-    })
-    .catch((e) =>{
-      res.status(400).json({ message: "something  went wrong", error: e });
-    })
-  })
 //Update an evaluation for a student
 router.put("/:evaluationId", function (req, res, next) {
     const evaluationId = req.params.evaluationId;
@@ -43,24 +33,19 @@ router.put("/:evaluationId", function (req, res, next) {
  
   //Create evaluation for a student
 router.post("/", function (req, res, next) {
-  const studentId = req.params.id;
-  const { evalDate, clrCode, remarks } = req.body; 
+  const { evalDate, clrCode, remarks , studentId} = req.body; 
   Evaluation.create({
     evalDate,
     studentId,
     clrCode,
     remarks,
     })
-    .then((evaluation) => {
-      Student.updateOne({_id: studentId},
-      {lstClrCode:clrCode}
-      )
-      .then(resp => {
-        console.log("Response :",resp)
-        res.status(200).json({ message: "Successfully evaluated student", evaluation:evaluation });
-      })
-      .catch(e => console.log("error :",e))
-      
+    .then((evaluationRes) => {
+      Student.findByIdAndUpdate({_id: studentId}, {lstClrCode: clrCode, $push: { evaluations: evaluationRes}})
+        .then(() => {
+          res.status(200).json({ message: "Successfully created evaluation", evaluation: evaluationRes })
+        })
+        .catch((e) => res.status(400).json({ message: "something  went wrong", error: e }))
     })
     .catch((e) => {
       res.status(400).json({ message: "something  went wrong", error: e });

@@ -39,7 +39,6 @@ router.put("/", function (req, res, next) {
 
 // Update users profilePicture
 router.put("/profilepicture", function (req, res, next) {
-  console.log("body.profilepicture : ", req.body.profilePicture)
   const userId = req.user._id;
   console.log("userId :", userId)
   User.findByIdAndUpdate(
@@ -50,7 +49,6 @@ router.put("/profilepicture", function (req, res, next) {
     {new: true}
   )
   .then((profileResp) => {
-    console.log("profileResp",profileResp)
     res.status(200).json({user: profileResp})
     return
   })
