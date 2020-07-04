@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Student = require('../models/student');
 const Batch = require('../models/batch');
-let mongoose = require('mongoose');
+
 
 //Create student
 router.post('/', function (req, res) {
@@ -48,52 +48,6 @@ router.get('/:studentId', function (req, res, next) {
     });
 });
 
-//Calculate percentages of green , yellow , red students in a class
-router.get('/:batchId/percentage', function (req, res, next) {
-  const { batchId } = req.params;
-  Student
-    .aggregate([
-      {$match: { batchId: mongoose.Types.ObjectId(`${batchId}` )}},
-      {$group: {_id: "$lstClrCode", count: { $sum: 1 } }}
-    ])
-    .then((result) => {
-      console.log('aggregate',result)
-      let redPercent = 0;
-      let redCount = 0;
-      let greenPercent = 0;
-      let greenCount = 0;
-      let yellowPercent = 0;
-      let yellowCount = 0;
-
-      const totalCount = result.reduce((accumulator, currentvalue) => {
-        console.log("accumulator :", accumulator)
-        console.log("currentvalue :", currentvalue)
-        switch (currentvalue._id) {
-          case 'Red':
-            redCount = parseInt(currentvalue.count);
-            break;
-          case 'Green':
-            greenCount = parseInt(currentvalue.count);
-            break;
-          case 'Yellow':
-            yellowCount = parseInt(currentvalue.count);
-            break;
-          default:
-            break;
-        }
-        return accumulator + parseInt(currentvalue.count);
-      }, 0);
-
-      console.log("totalCount", totalCount) 
-
-      redPercent = (redCount / totalCount) * 100;
-      greenPercent = (greenCount / totalCount) * 100;
-      yellowPercent = (yellowCount / totalCount) * 100;
-
-      res.status(200).json([redPercent, greenPercent, yellowPercent]);
-    })
-    .catch((err) => next(err));
-});
 
 // Update Student
 router.put('/:studentId', function (req, res) {

@@ -31,7 +31,7 @@ router.post('/login', function(req, res, next) {
    passport.authenticate("local", (err, user, info) => {
      if (err) { return next(err); }
      // console.log("user", user)
-     if (!user) { return res.status(401).json({error: 'user not authenticatd'}); }
+     if (!user) { return res.status(401).json({message: 'user not authenticated'}); }
      req.logIn(user, function(err) {
        if (err) { return next(err); }
        //new user is created inorder to avoid password to be sent in the frontend 
@@ -63,7 +63,7 @@ router.post('/login', function(req, res, next) {
   }
   res.status(403).json({message: 'please authenticate'})
 });
-
+//Logout router
 router.get("/logout", (req, res) => {
   req.logout();
   res.status(200).json({ message: "Successfully logged out" });
