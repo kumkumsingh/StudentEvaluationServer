@@ -42,6 +42,7 @@ router.post('/login', function(req, res, next) {
          email: req.user.email,
          profilePicture: req.user.profilePicture,
        }
+       console.log("newUser :",newUser)
        return res.status(200).json(newUser);
      });
    })(req, res, next)

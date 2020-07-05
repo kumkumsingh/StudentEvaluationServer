@@ -10,7 +10,12 @@ const Mongostore   = require('connect-mongo')(session)
 const cors           = require('cors')
 
 mongoose
-  .connect(process.env.MONGODB_URL, {useNewUrlParser: true})
+  .connect(process.env.MONGODB_URL, 
+    {useNewUrlParser: true , 
+     useUnifiedTopology: true,
+     useFindAndModify: false,
+     useCreateIndex: true
+  })
   .then(x => {
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
   })
@@ -46,9 +51,6 @@ app.use(session({
 }))
 
 require('./passport')(app);
-
-
-
 
 app.get('/', (req, res, next) =>  res.status(200).json({ message: 'Welkome to home page'}))
 

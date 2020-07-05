@@ -68,11 +68,27 @@ router.put('/:studentId', function (req, res) {
       res.status(400).json({message: 'something went wrong', error: e});
     });
 });
+
 // Delete Student
 router.delete('/:studentId', function (req, res) {
   Student.findByIdAndRemove({_id: req.params.studentId})
-    .then(() => {
-      res.status(200).json({message: 'Successfully Deleted student'});
+    .then((student)=>{
+      return Batch.findById({_id: student.batchId})
+    })
+    .then(batch =>{
+      let students = batch.students.filter(student => (JSON.stringify(student) !== JSON.stringify(req.params.studentId)))
+      Batch.findByIdAndUpdate({_id: batch._id}, {students: students},  {new: true} )
+      .populate({
+        path: 'students',
+        model: 'Student',
+      })
+      .exec((err, updatedBatch) => {
+        if (err) {
+          res.status(400).json({message: 'something  went wrong', error: err});
+        } else {
+          res.status(200).json({message: 'Student successfully deleted', batch: updatedBatch});
+        }
+      });
     })
     .catch((e) => {
       res.status(400).json({message: 'something went wrong', error: e});
