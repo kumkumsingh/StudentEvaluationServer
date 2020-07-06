@@ -5,8 +5,8 @@ const Student = require('../models/student');
 const User = require('../models/user');
 let mongoose = require('mongoose');
 
-const calculatePercentage =(batchId) => {
-  console.log("batchId", batchId)
+const calculatePercentage = (batchId) => {
+  console.log('batchId', batchId);
   let greenCount = 0;
   let yellowPercent = 0;
   let yellowCount = 0;
@@ -14,40 +14,44 @@ const calculatePercentage =(batchId) => {
   let redCount = 0;
   let greenPercent = 0;
 
-   return Student.aggregate([
+  return Student.aggregate([
     {$match: {batchId: mongoose.Types.ObjectId(batchId)}},
     {$group: {_id: '$lstClrCode', count: {$sum: 1}}},
-  ])
-    .then((result) => {
-      console.log("result", result)
-      let totalCount = 0;
-      totalCount = result.reduce((accumulator, currentvalue) => {
-        switch (currentvalue._id) {
-          case 'Red':
-            redCount = parseInt(currentvalue.count);
-            break;
-          case 'Green':
-            greenCount = parseInt(currentvalue.count);
-            break;
-          case 'Yellow':
-            yellowCount = parseInt(currentvalue.count);
-            break;
-          default:
-            break;
-        }
-        return accumulator + parseInt(currentvalue.count);
-      }, 0);
-      redPercent = (redCount / totalCount) * 100;
-      greenPercent = (greenCount / totalCount) * 100;
-      yellowPercent = (yellowCount / totalCount) * 100;
-      
-      console.log("red, green, yellow", redPercent, greenPercent, yellowPercent)
-      return { message: "success" , 
-               percentage: [{ Red: redPercent }, { Green: greenPercent }, { Yellow: yellowPercent }],
-               count: {redCount, greenCount, yellowCount}
-              }
-    })
-}
+  ]).then((result) => {
+    console.log('result', result);
+    let totalCount = 0;
+    totalCount = result.reduce((accumulator, currentvalue) => {
+      switch (currentvalue._id) {
+        case 'Red':
+          redCount = parseInt(currentvalue.count);
+          break;
+        case 'Green':
+          greenCount = parseInt(currentvalue.count);
+          break;
+        case 'Yellow':
+          yellowCount = parseInt(currentvalue.count);
+          break;
+        default:
+          break;
+      }
+      return accumulator + parseInt(currentvalue.count);
+    }, 0);
+    redPercent = (redCount / totalCount) * 100;
+    greenPercent = (greenCount / totalCount) * 100;
+    yellowPercent = (yellowCount / totalCount) * 100;
+
+    console.log('red, green, yellow', redPercent, greenPercent, yellowPercent);
+    return {
+      message: 'success',
+      percentage: [
+        {Red: redPercent},
+        {Green: greenPercent},
+        {Yellow: yellowPercent},
+      ],
+      count: {redCount, greenCount, yellowCount},
+    };
+  });
+};
 
 const findRandomColor = (count) => {
   let colorFound = false;
@@ -67,15 +71,17 @@ const findRandomColor = (count) => {
         randomColor = 'Green';
         colorFound = true;
         break;
-      case count.redCount === 0 && count.greenCount === 0 && count.yellowCount === 0 :
+      case count.redCount === 0 &&
+        count.greenCount === 0 &&
+        count.yellowCount === 0:
         randomColor = '';
-        colorFound = true;  
+        colorFound = true;
       default:
         break;
     }
   } while (!colorFound);
-  return randomColor
-}
+  return randomColor;
+};
 
 //Create batch
 router.post('/', function (req, res, next) {
@@ -115,7 +121,7 @@ router.post('/', function (req, res, next) {
 // Delete Batch
 router.delete('/:batchId', function (req, res) {
   console.log('batchId', req.params.batchId);
-  let batches
+  let batches;
   Batch.findByIdAndRemove({_id: req.params.batchId})
     .then(() => {
       return User.findById({_id: req.user._id});
@@ -129,22 +135,25 @@ router.delete('/:batchId', function (req, res) {
         {batches: batches},
         {upsert: true}
       )
-      .populate({
-        path: 'batches',
-        model: 'Batch',
-      })
-      .exec((err, user) => {
-        if (err) {
-          console.log('err');
-          res
-            .status(400)
-            .json({message: 'something  went wrong', error: err});
-        } else {
-          res
-            .status(200)
-            .json({message: 'Batch deleted successfully', batches: user.batches});
-        }
-      });
+        .populate({
+          path: 'batches',
+          model: 'Batch',
+        })
+        .exec((err, user) => {
+          if (err) {
+            console.log('err');
+            res
+              .status(400)
+              .json({message: 'something  went wrong', error: err});
+          } else {
+            res
+              .status(200)
+              .json({
+                message: 'Batch deleted successfully',
+                batches: user.batches,
+              });
+          }
+        });
     })
     .catch((e) => {
       res.status(400).json({message: 'something went wrong', error: e});
@@ -171,19 +180,21 @@ router.get('/:batchId', function (req, res, next) {
 router.get('/:batchId/percentage', function (req, res, next) {
   const {batchId} = req.params;
   calculatePercentage(batchId)
-   .then(resp => res.status(200).json( resp.percentage ))
-   .catch(err => res.status(400).json({ message: "Something went wrong", err: err }))
+    .then((resp) => res.status(200).json(resp.percentage))
+    .catch((err) =>
+      res.status(400).json({message: 'Something went wrong', err: err})
+    );
 });
 
 //to get random record based on algorithm
 router.get('/:batchId/random', function (req, res, next) {
   const {batchId} = req.params;
   calculatePercentage(batchId)
-  .then(resp => {
-      console.log("resp", resp)
-      const randomColor = findRandomColor(resp.count)
-      if (randomColor === "") {
-        return null
+    .then((resp) => {
+      console.log('resp', resp);
+      const randomColor = findRandomColor(resp.count);
+      if (randomColor === '') {
+        return null;
       } else {
         return Student.find({
           lstClrCode: randomColor,
@@ -191,15 +202,15 @@ router.get('/:batchId/random', function (req, res, next) {
         });
       }
     })
-  .then((students) => {
-    if(students) {
-      const randomIndex = parseInt(Math.random() * students.length);
-      res.status(200).json({randomStudent: students[randomIndex]});
-    } else {
-      res.status(200).json({randomStudent: null})
-    }
-  })
-  .catch((err) => next(err))
-})
+    .then((students) => {
+      if (students) {
+        const randomIndex = parseInt(Math.random() * students.length);
+        res.status(200).json({randomStudent: students[randomIndex]});
+      } else {
+        res.status(200).json({randomStudent: null});
+      }
+    })
+    .catch((err) => next(err));
+});
 
 module.exports = router;

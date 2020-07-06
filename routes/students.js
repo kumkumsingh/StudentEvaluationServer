@@ -3,7 +3,6 @@ const router = express.Router();
 const Student = require('../models/student');
 const Batch = require('../models/batch');
 
-
 //Create student
 router.post('/', function (req, res) {
   const {name, imgUrl, batchId} = req.body;
@@ -15,12 +14,10 @@ router.post('/', function (req, res) {
     .then((studentRes) => {
       Batch.findByIdAndUpdate({_id: batchId}, {$push: {students: studentRes}})
         .then(() => {
-          res
-            .status(200)
-            .json({
-              message: 'Successfully created student',
-              student: studentRes,
-            });
+          res.status(200).json({
+            message: 'Successfully created student',
+            student: studentRes,
+          });
         })
         .catch((e) =>
           res.status(400).json({message: 'something  went wrong', error: e})
@@ -48,7 +45,6 @@ router.get('/:studentId', function (req, res, next) {
     });
 });
 
-
 // Update Student
 router.put('/:studentId', function (req, res) {
   Student.findByIdAndUpdate(
@@ -72,23 +68,35 @@ router.put('/:studentId', function (req, res) {
 // Delete Student
 router.delete('/:studentId', function (req, res) {
   Student.findByIdAndRemove({_id: req.params.studentId})
-    .then((student)=>{
-      return Batch.findById({_id: student.batchId})
+    .then((student) => {
+      return Batch.findById({_id: student.batchId});
     })
-    .then(batch =>{
-      let students = batch.students.filter(student => (JSON.stringify(student) !== JSON.stringify(req.params.studentId)))
-      Batch.findByIdAndUpdate({_id: batch._id}, {students: students},  {new: true} )
-      .populate({
-        path: 'students',
-        model: 'Student',
-      })
-      .exec((err, updatedBatch) => {
-        if (err) {
-          res.status(400).json({message: 'something  went wrong', error: err});
-        } else {
-          res.status(200).json({message: 'Student successfully deleted', batch: updatedBatch});
-        }
-      });
+    .then((batch) => {
+      let students = batch.students.filter(
+        (student) =>
+          JSON.stringify(student) !== JSON.stringify(req.params.studentId)
+      );
+      Batch.findByIdAndUpdate(
+        {_id: batch._id},
+        {students: students},
+        {new: true}
+      )
+        .populate({
+          path: 'students',
+          model: 'Student',
+        })
+        .exec((err, updatedBatch) => {
+          if (err) {
+            res
+              .status(400)
+              .json({message: 'something  went wrong', error: err});
+          } else {
+            res.status(200).json({
+              message: 'Student successfully deleted',
+              batch: updatedBatch,
+            });
+          }
+        });
     })
     .catch((e) => {
       res.status(400).json({message: 'something went wrong', error: e});

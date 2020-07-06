@@ -30,7 +30,6 @@ router.post('/login', function(req, res, next) {
   //authenticate based on local strategy
    passport.authenticate("local", (err, user, info) => {
      if (err) { return next(err); }
-     // console.log("user", user)
      if (!user) { return res.status(401).json({message: 'user not authenticated'}); }
      req.logIn(user, function(err) {
        if (err) { return next(err); }
@@ -42,7 +41,6 @@ router.post('/login', function(req, res, next) {
          email: req.user.email,
          profilePicture: req.user.profilePicture,
        }
-       console.log("newUser :",newUser)
        return res.status(200).json(newUser);
      });
    })(req, res, next)
@@ -58,13 +56,12 @@ router.post('/login', function(req, res, next) {
       profilePicture: req.user.profilePicture,
       batches: req.user.batches
     }
-    // console.log("batches :", newUser.batches)
     res.status(200).json(newUser)
     return
   }
   res.status(403).json({message: 'please authenticate'})
 });
-//Logout router
+//Logout method from passport strategy
 router.get("/logout", (req, res) => {
   req.logout();
   res.status(200).json({ message: "Successfully logged out" });

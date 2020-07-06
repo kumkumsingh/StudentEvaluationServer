@@ -18,12 +18,10 @@ router.put('/:evaluationId', function (req, res, next) {
       Student.updateOne({_id: studentId}, {lstClrCode: clrCode})
         .then((resp) => {
           console.log('Response :', resp);
-          res
-            .status(200)
-            .json({
-              message: 'Successfully updated  evaluation and student',
-              evaluation,
-            });
+          res.status(200).json({
+            message: 'Successfully updated  evaluation and student',
+            evaluation,
+          });
         })
         .catch((e) => console.log('error :', e));
     })

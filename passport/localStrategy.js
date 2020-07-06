@@ -10,7 +10,6 @@ passport.use(new LocalStrategy( {
   (userName, password, done) => {
     User.findOne({ userName })
     .then(foundUser => {
-      // console.log("founduser", foundUser);
       if (!foundUser) {
         done(null, false, { message: 'Incorrect username' });
         return;
